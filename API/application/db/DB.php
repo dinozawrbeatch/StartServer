@@ -31,7 +31,8 @@ class DB
                 (login, hash, name) 
                 VALUES ('$login', '$hash', '$name')";
         $result = $this->db->query($query);
-        if($result) return true;
+        if ($result)
+            return true;
         return false;
     }
 
@@ -39,6 +40,12 @@ class DB
     {
         $query = "SELECT * FROM `users` 
                 WHERE login= '$login'";
+        return $this->db->query($query)
+            ->fetchObject();
+    }
+
+    public function getLoginById($id){
+        $query = "SELECT login FROM `users` WHERE id= $id";
         return $this->db->query($query)
             ->fetchObject();
     }
@@ -53,14 +60,19 @@ class DB
             ->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getPostsById($id)
+    {
+        $query = "SELECT * FROM `posts`
+                WHERE user_id= $id";
+        return $this->db->query($query)
+            ->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function uploadPost($login, $audio, $video, $image, $text)
     {
         $audioVariable = ($audio == '') ? '' : "$this->siteLink/audio/$audio.mp3";
-        print_r($audioVariable). '-аудио';
-        $videoVariable = ($video == '') ? '' : "$this->siteLink/video/$audio.mp4";
-        print_r($videoVariable. '-видео');
-        $imageVariable = ($image == '') ? '' : "$this->siteLink/images/$audio.png";
-        print_r($imageVariable. '-картинка');
+        $videoVariable = ($video == '') ? '' : "$this->siteLink/video/$video.mp4";
+        $imageVariable = ($image == '') ? '' : "$this->siteLink/images/$image.png";
         $user = $this->getUser($login);
         $user_id = $user->id;
         $query = "INSERT INTO `posts`
@@ -70,8 +82,9 @@ class DB
                 '$text', 
                 '$audioVariable',
                 '$videoVariable',
-                '$imageVariable'"; 
-        if($this->db->query($query)) return true;
+                '$imageVariable')";
+        if ($this->db->query($query))
+            return true;
         return false;
     }
 
@@ -79,63 +92,39 @@ class DB
     {
         $user = $this->getUser($login);
         $user_id = $user->id;
-        $query  = "SELECT * FROM `posts`";
-        $arr = array(
-                array(
-                'avatar' => 'http://startserver/images/2.jpg',
-                'name' => 'Имя юзверя',
-                'text' => 'Текст поста',
-                'postImage' => 'http://startserver/images/2.jpg',
-                'video' => 'http://startserver/videos/meme.mp4',
-                'audio' => 'http://startserver/audios/audio.mp3'
-            ),
-                array(
-                'avatar' => 'http://startserver/images/2.jpg',
-                'name' => 'Имя юзверя',
-                'text' => 'Текст поста',
-                'postImage' => 'http://startserver/images/2.jpg',
-                'video' => 'http://startserver/videos/meme.mp4',
-                'audio' => 'http://startserver/audios/audio.mp3'
-            ),
-                array(
-                'avatar' => 'http://startserver/images/2.jpg',
-                'name' => 'Имя юзверя',
-                'text' => 'Текст поста',
-                'postImage' => 'http://startserver/images/2.jpg',
-                'video' => 'http://startserver/videos/meme.mp4',
-                'audio' => 'http://startserver/audios/audio.mp3'
-            ),
-                array(
-                'avatar' => 'http://startserver/images/2.jpg',
-                'name' => 'Имя юзверя',
-                'text' => 'Текст поста',
-                'postImage' => 'http://startserver/images/2.jpg',
-                'video' => 'http://startserver/videos/meme.mp4',
-                'audio' => 'http://startserver/audios/audio.mp3'
-            ),
-                array(
-                'avatar' => 'http://startserver/images/2.jpg',
-                'name' => 'Имя юзверя',
-                'text' => 'Текст поста',
-                'postImage' => 'http://startserver/images/2.jpg',
-                'video' => 'http://startserver/videos/meme.mp4',
-                'audio' => 'http://startserver/audios/audio.mp3'
-            ),
-        );
-        return $arr;
+        $query = "SELECT * FROM `follows`
+                WHERE follower_id= $user_id";
+        $follows_id = $this->db->query($query)
+            ->fetchAll(PDO::FETCH_ASSOC);
+        $arr = array();
+        foreach ($follows_id as $follow) {
+            $user_posts=$this->getPostsById($follow['user_id']);
+            array_push($arr, $user_posts);
+        }
+        $posts = array();
+        foreach($arr as $user_posts){
+            foreach($user_posts as $user_post){
+                array_push($posts, $user_post);
+            }
+        }
+        return $posts;
     }
 
-    public function dislike($post_id){
+    public function dislike($post_id)
+    {
         $query = "UPDATE `posts` SET likes = likes - 1
-                WHERE post_id= $post_id";
-        if($this->db->query($query)) return true;
+                WHERE id= $post_id";
+        if ($this->db->query($query))
+            return true;
         return false;
     }
-    
-    public function like($post_id){
+
+    public function like($post_id)
+    {
         $query = "UPDATE `posts` SET likes = likes + 1
-                WHERE post_id= $post_id";
-        if($this->db->query($query)) return true;
+                WHERE id= $post_id";
+        if ($this->db->query($query))
+            return true;
         return false;
     }
 
