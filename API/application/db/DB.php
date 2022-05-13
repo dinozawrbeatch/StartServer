@@ -8,6 +8,7 @@ class DB
         $name = 'start';
         $user = 'root';
         $pass = '';
+        $this->siteLink = 'http://startserver';
         try {
             $this->db = new PDO(
                 'mysql:' .
@@ -45,7 +46,7 @@ class DB
     public function getPosts($login)
     {
         $user = $this->getUser($login);
-        $user_id = $user['id'];
+        $user_id = $user->id;
         $query = "SELECT * FROM `posts`
                 WHERE user_id= $user_id";
         return $this->db->query($query)
@@ -54,11 +55,22 @@ class DB
 
     public function uploadPost($login, $audio, $video, $image, $text)
     {
+        $audioVariable = ($audio == '') ? '' : "$this->siteLink/audio/$audio.mp3";
+        print_r($audioVariable). '-аудио';
+        $videoVariable = ($video == '') ? '' : "$this->siteLink/video/$audio.mp4";
+        print_r($videoVariable. '-видео');
+        $imageVariable = ($image == '') ? '' : "$this->siteLink/images/$audio.png";
+        print_r($imageVariable. '-картинка');
         $user = $this->getUser($login);
         $user_id = $user->id;
         $query = "INSERT INTO `posts`
                 (user_id, text, audio, video, image)
-                VALUES ($user_id, '$text', '$audio', '$video', '$image')"; 
+                VALUES (
+                $user_id,
+                '$text', 
+                '$audioVariable',
+                '$videoVariable',
+                '$imageVariable'"; 
         if($this->db->query($query)) return true;
         return false;
     }
@@ -67,7 +79,7 @@ class DB
     {
         $user = $this->getUser($login);
         $user_id = $user->id;
-        $query  = "SELECT ";
+        $query  = "SELECT * FROM `posts`";
         $arr = array(
                 array(
                 'avatar' => 'http://startserver/images/2.jpg',
@@ -113,8 +125,16 @@ class DB
         return $arr;
     }
 
+    public function dislike($post_id){
+        $query = "UPDATE `posts` SET likes = likes - 1
+                WHERE post_id= $post_id";
+        if($this->db->query($query)) return true;
+        return false;
+    }
+    
     public function like($post_id){
-        $query = "UPDATE `posts` SET likes = likes + 1";
+        $query = "UPDATE `posts` SET likes = likes + 1
+                WHERE post_id= $post_id";
         if($this->db->query($query)) return true;
         return false;
     }

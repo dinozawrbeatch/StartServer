@@ -11,7 +11,7 @@ class Profile
     { 
         $user = $this->db->getUser($login);
         if($user){
-            $posts = $this->db->getPosts($user->id);
+            $posts = $this->db->getPosts($login);
             return array(
                 'avatar' => $user->avatar,
                 'login' => $user->login,

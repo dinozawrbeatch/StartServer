@@ -33,35 +33,41 @@ class Application
 
     public function uploadPost($params)
     {
-        if ($_FILES['image']['error'] == 0) {
+        if ($_FILES['image']) {
             $imageName = md5(md5($_FILES['image']['name']) . rand(0, 1000)) . rand(0, 1000);
             move_uploaded_file($_FILES['image']['tmp_name'], '../images/' . $imageName . '.png');
         }
-        if ($_FILES['video']['error'] == 0) {
+        if ($_FILES['video']) {
             $videoName = md5(md5($_FILES['video']['name']) . rand(0, 1000)) . rand(0, 1000);
             move_uploaded_file($_FILES['video']['tmp_name'], '../videos/' . $videoName . '.mp4');
         }
-        if ($_FILES['audio']['error'] == 0) {
+        if ($_FILES['audio']) {
             $audioName = md5(md5($_FILES['audio']['name']) . rand(0, 1000)) . rand(0, 1000);
             move_uploaded_file($_FILES['audio']['tmp_name'], '../audio/' . $audioName . '.mp3');
         }
+        if(!$imageName) $imageName = '';
+        if(!$videoName) $videoName = '';
+        if(!$audioName) $audioName = '';
         return $this->db->uploadPost($params['login'], $audioName, $videoName, $imageName, $params['text']);
     }
 
-    public function getPosts($login)
+    public function getPosts($params)
     {
+        $login = $params['login'];
         if ($login)
             return $this->db->getPosts($login);
     }
 
-    public function getProfile($login)
+    public function getProfile($params)
     {
+        $login = $params['login'];
         if ($login)
             return $this->profile->getProfile($login);
     }
 
-    public function getNewsFeed($login)
+    public function getNewsFeed($params)
     {
+        $login = $params['login'];
         if ($login)
             return $this->profile->getNewsFeed($login);
     }
@@ -75,5 +81,11 @@ class Application
     {
         $post_id = $params['id'];
         return $this->db->like($post_id);
+    }
+    
+    public function dislike($params)
+    {
+        $post_id = $params['id'];
+        return $this->db->dislike($post_id);
     }
 }
