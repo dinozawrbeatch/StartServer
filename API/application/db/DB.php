@@ -50,14 +50,33 @@ class DB
             ->fetchObject();
     }
 
-    public function getPosts($login)
+    public function getPosts($login, $requestor_login)
     {
         $user = $this->getUser($login);
+        $requestor = $this->getUser($requestor_login);
+        $requestor_id = $requestor->id;
         $user_id = $user->id;
         $query = "SELECT * FROM `posts`
                 WHERE user_id= $user_id";
-        return $this->db->query($query)
+        $posts =  $this->db->query($query)
             ->fetchAll(PDO::FETCH_ASSOC);
+        foreach($posts as $post){
+            print_r($post);
+            $post['name'] = $user->name;
+            $post['avatar'] = $user->avatar;
+            $post['isUserLiked'] = $this->isUserLiked($requestor_id, $post['id']); 
+        }
+
+        return $posts;
+    }
+
+    public function isUserLiked($requestor_id, $post_id){
+        $query = "SELECT * FROM `likes`
+                WHERE user_id= $requestor_id 
+                AND post_id= $post_id";
+        if($this->db->query($query))
+            return true;
+        return false;
     }
 
     public function getPostsById($id)
@@ -71,7 +90,7 @@ class DB
     public function uploadPost($login, $audio, $video, $image, $text)
     {
         $audioVariable = ($audio == '') ? '' : "$this->siteLink/audio/$audio.mp3";
-        $videoVariable = ($video == '') ? '' : "$this->siteLink/video/$video.mp4";
+        $videoVariable = ($video == '') ? '' : "$this->siteLink/videos/$video.mp4";
         $imageVariable = ($image == '') ? '' : "$this->siteLink/images/$image.png";
         $user = $this->getUser($login);
         $user_id = $user->id;
@@ -110,19 +129,28 @@ class DB
         return $posts;
     }
 
-    public function dislike($post_id)
+    public function dislike($post_id, $login)
     {
+        $user = $this->getUser($login);
+        $user_id = $user->id;
         $query = "UPDATE `posts` SET likes = likes - 1
-                WHERE id= $post_id";
+                WHERE id= $post_id;
+                DELETE FROM `likes`
+                WHERE post_id= $post_id
+                AND user_id= $user_id)";
         if ($this->db->query($query))
             return true;
         return false;
     }
 
-    public function like($post_id)
+    public function like($post_id, $login)
     {
+        $user = $this->getUser($login);
+        $user_id = $user->id;
         $query = "UPDATE `posts` SET likes = likes + 1
-                WHERE id= $post_id";
+                WHERE id= $post_id;
+                INSERT INTO `likes` (post_id, user_id)
+                VALUES ($post_id, $user_id)";
         if ($this->db->query($query))
             return true;
         return false;
@@ -133,5 +161,23 @@ class DB
         $query = "SELECT * FROM `users`";
         return $this->db->query($query)
             ->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function follow($user_id, $follower_id){
+        $query = "INSERT INTO `follows`
+                (user_id, follower_id)
+                VALUES ($user_id, $follower_id)";
+        if($this->db->query($query)) 
+            return true;
+        return false;
+    }
+    
+    public function unfollow($user_id, $follower_id){
+        $query = "DELETE FROM `follows`
+                WHERE user_id= $user_id
+                AND follower_id= $follower_id";
+        if($this->db->query($query)) 
+            return true;
+        return false;
     }
 }

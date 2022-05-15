@@ -19,6 +19,7 @@ function router($params){
             case 'uploadPost': return $app->uploadPost($params);
             case 'like': return $app->like($params);
             case 'dislike': return $app->dislike($params);
+            case 'follow': return $app->follow($params);
         }
         return false;
     }

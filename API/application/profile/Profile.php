@@ -7,12 +7,13 @@ class Profile
         $this->db = $db;
     }
 
-    public function getProfile($login)
+    public function getProfile($login, $requestor)
     { 
         $user = $this->db->getUser($login);
         if($user){
-            $posts = $this->db->getPosts($login);
+            $posts = $this->db->getPosts($login, $requestor);
             return array(
+                'name' => $user->name,
                 'avatar' => $user->avatar,
                 'login' => $user->login,
                 'description' => $user->description,
@@ -21,8 +22,8 @@ class Profile
         }
     }
 
-    public function getNewsFeed($login)
+    public function getNewsFeed($login, $requestor)
     {
-        return $this->db->getNewsFeed($login);
+        return $this->db->getNewsFeed($login, $requestor);
     }
 }

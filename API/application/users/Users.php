@@ -21,11 +21,26 @@ class Users
         $user = $this->db->getUser($login);
         if($user){
             return array(
+                'name' => $user->name,
                 'avatar' => $user->avatar,
                 'login' => $user->login,
                 'description' => $user->description,
             );
         }
+    }
+
+    public function follow($user_login, $follower_login){
+        $user = $this->db->getUser($user_login);
+        $follower = $this->db->getUser($follower_login);
+        if($user && $follower)
+            return $this->db->follow($user->id, $follower->id);
+    }
+
+    public function unfollow($user_login, $follower_login){
+        $user = $this->db->getUser($user_login);
+        $follower = $this->db->getUser($follower_login);
+        if($user && $follower)
+            return $this->db->unfollow($user->id, $follower->id);
     }
 
     public function getUsers($login){

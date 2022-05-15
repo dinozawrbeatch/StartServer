@@ -55,21 +55,22 @@ class Application
     {
         $login = $params['login'];
         if ($login)
-            return $this->db->getPosts($login);
+            return $this->db->getPosts($login, $login);
     }
 
     public function getProfile($params)
     {
         $login = $params['login'];
-        if ($login)
-            return $this->profile->getProfile($login);
+        $requestor = $params['requestor'];
+        if ($login && $requestor)
+            return $this->profile->getProfile($login, $requestor);
     }
 
     public function getNewsFeed($params)
     {
         $login = $params['login'];
         if ($login)
-            return $this->profile->getNewsFeed($login);
+            return $this->profile->getNewsFeed($login, $login);
     }
 
     public function getUsers()
@@ -88,4 +89,20 @@ class Application
         $post_id = $params['id'];
         return $this->db->dislike($post_id);
     }
+
+    public function follow($params)
+    {
+        $user_login = $params['userLogin'];
+        $follower_login = $params['followerLogin'];
+        if($user_login && $follower_login)
+            return $this->users->follow($user_login, $follower_login);
+    }
+    
+    public function unfollow($params)
+    {
+        $user_login = $params['userLogin'];
+        $follower_login = $params['followerLogin'];
+        if($user_login && $follower_login)
+            return $this->users->unfollow($user_login, $follower_login);
+    }  
 }
