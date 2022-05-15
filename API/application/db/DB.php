@@ -56,25 +56,42 @@ class DB
         $requestor = $this->getUser($requestor_login);
         $requestor_id = $requestor->id;
         $user_id = $user->id;
-        $query = "SELECT * FROM `posts`
+        $query = "SELECT * FROM posts
                 WHERE user_id= $user_id";
         $posts =  $this->db->query($query)
             ->fetchAll(PDO::FETCH_ASSOC);
+        $new_posts = array();
         foreach($posts as $post){
-            print_r($post);
-            $post['name'] = $user->name;
-            $post['avatar'] = $user->avatar;
-            $post['isUserLiked'] = $this->isUserLiked($requestor_id, $post['id']); 
+            $arr = array(
+                "name" => $user->name,
+                "avatar" => $user->avatar,
+                "isUserLiked" => $this->isUserLiked($requestor_id, $post['id'])
+            );
+            $post = array_merge($post, $arr);
+            array_push($new_posts, $post);
         }
 
-        return $posts;
+        return $new_posts;
     }
 
     public function isUserLiked($requestor_id, $post_id){
         $query = "SELECT * FROM `likes`
                 WHERE user_id= $requestor_id 
                 AND post_id= $post_id";
-        if($this->db->query($query))
+        if($this->db->query($query)->fetchObject())
+            return true;
+        return false;
+    }
+
+    public function isUserFollowed($user_login, $follower_login){
+        $user = $this->getUser($user_login);
+        $user_id = $user->id;
+        $follower = $this->getUser($follower_login);
+        $follower_id = $follower->id;
+        $query = "SELECT * FROM `follows`
+                WHERE user_id= $user_id 
+                AND follower_id= $follower_id";
+        if($this->db->query($query)->fetchObject())
             return true;
         return false;
     }
@@ -107,7 +124,7 @@ class DB
         return false;
     }
 
-    public function getNewsFeed($login)
+    public function getNewsFeed($login, $requstor)
     {
         $user = $this->getUser($login);
         $user_id = $user->id;
@@ -137,7 +154,7 @@ class DB
                 WHERE id= $post_id;
                 DELETE FROM `likes`
                 WHERE post_id= $post_id
-                AND user_id= $user_id)";
+                AND user_id= $user_id";
         if ($this->db->query($query))
             return true;
         return false;

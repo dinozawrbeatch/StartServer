@@ -8,7 +8,7 @@ class Profile
     }
 
     public function getProfile($login, $requestor)
-    { 
+    {
         $user = $this->db->getUser($login);
         if($user){
             $posts = $this->db->getPosts($login, $requestor);
@@ -17,7 +17,8 @@ class Profile
                 'avatar' => $user->avatar,
                 'login' => $user->login,
                 'description' => $user->description,
-                'posts' => $posts
+                'posts' => $posts,
+                'isFollowed' => $this->db->isUserFollowed($login, $requestor)
             );
         }
     }

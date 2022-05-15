@@ -2,6 +2,7 @@
 require_once('db/DB.php');
 require_once('users/Users.php');
 require_once('profile/Profile.php');
+require_once('posts/Posts.php');
 
 class Application
 {
@@ -80,14 +81,16 @@ class Application
     
     public function like($params)
     {
+        $login = $params['login'];
         $post_id = $params['id'];
-        return $this->db->like($post_id);
+        return $this->db->like($post_id, $login);
     }
     
     public function dislike($params)
     {
+        $login = $params['login'];
         $post_id = $params['id'];
-        return $this->db->dislike($post_id);
+        return $this->db->dislike($post_id, $login);
     }
 
     public function follow($params)
