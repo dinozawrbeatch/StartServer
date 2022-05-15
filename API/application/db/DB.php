@@ -96,14 +96,6 @@ class DB
         return false;
     }
 
-    public function getPostsById($id)
-    {
-        $query = "SELECT * FROM `posts`
-                WHERE user_id= $id";
-        return $this->db->query($query)
-            ->fetchAll(PDO::FETCH_ASSOC);
-    }
-
     public function uploadPost($login, $audio, $video, $image, $text)
     {
         $audioVariable = ($audio == '') ? '' : "$this->siteLink/audio/$audio.mp3";
@@ -124,17 +116,18 @@ class DB
         return false;
     }
 
-    public function getNewsFeed($login, $requstor)
+    public function getNewsFeed($login)
     {
         $user = $this->getUser($login);
         $user_id = $user->id;
-        $query = "SELECT * FROM `follows`
+        $query = "SELECT user_id FROM `follows`
                 WHERE follower_id= $user_id";
-        $follows_id = $this->db->query($query)
+        $follows_ids = $this->db->query($query)
             ->fetchAll(PDO::FETCH_ASSOC);
         $arr = array();
-        foreach ($follows_id as $follow) {
-            $user_posts=$this->getPostsById($follow['user_id']);
+        foreach ($follows_ids as $follow_id) {
+            $user_login = $this->getLoginById($follow_id);
+            $user_posts=$this->getPosts($user_login, $login);
             array_push($arr, $user_posts);
         }
         $posts = array();

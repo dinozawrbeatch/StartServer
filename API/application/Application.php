@@ -2,7 +2,6 @@
 require_once('db/DB.php');
 require_once('users/Users.php');
 require_once('profile/Profile.php');
-require_once('posts/Posts.php');
 
 class Application
 {
@@ -71,7 +70,7 @@ class Application
     {
         $login = $params['login'];
         if ($login)
-            return $this->profile->getNewsFeed($login, $login);
+            return $this->profile->getNewsFeed($login);
     }
 
     public function getUsers()

@@ -23,8 +23,8 @@ class Profile
         }
     }
 
-    public function getNewsFeed($login, $requestor)
+    public function getNewsFeed($login)
     {
-        return $this->db->getNewsFeed($login, $requestor);
+        return $this->db->getNewsFeed($login);
     }
 }

@@ -20,6 +20,7 @@ function router($params){
             case 'like': return $app->like($params);
             case 'dislike': return $app->dislike($params);
             case 'follow': return $app->follow($params);
+            case 'unfollow': return $app->unfollow($params);
         }
         return false;
     }
