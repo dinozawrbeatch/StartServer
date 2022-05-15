@@ -126,8 +126,8 @@ class DB
             ->fetchAll(PDO::FETCH_ASSOC);
         $arr = array();
         foreach ($follows_ids as $follow_id) {
-            $user_login = $this->getLoginById($follow_id);
-            $user_posts=$this->getPosts($user_login, $login);
+            $user_login = $this->getLoginById($follow_id['user_id']);
+            $user_posts=$this->getPosts($user_login->login, $login);
             array_push($arr, $user_posts);
         }
         $posts = array();
