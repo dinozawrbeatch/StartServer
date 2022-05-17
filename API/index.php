@@ -21,6 +21,9 @@ function router($params){
             case 'dislike': return $app->dislike($params);
             case 'follow': return $app->follow($params);
             case 'unfollow': return $app->unfollow($params);
+            case 'updateDescription': return $app->updateDescription($params);
+            case 'updateAvatar': return $app->updateAvatar($params);
+            case 'updateName': return $app->updateName($params);
         }
         return false;
     }

@@ -44,24 +44,21 @@ class DB
             ->fetchObject();
     }
 
-    public function getLoginById($id){
-        $query = "SELECT login FROM `users` WHERE id= $id";
+    public function getUserById($id)
+    {
+        $query = "SELECT * FROM `users` WHERE id= $id";
         return $this->db->query($query)
             ->fetchObject();
     }
 
-    public function getPosts($login, $requestor_login)
+    public function getPosts($user, $requestor_id)
     {
-        $user = $this->getUser($login);
-        $requestor = $this->getUser($requestor_login);
-        $requestor_id = $requestor->id;
-        $user_id = $user->id;
         $query = "SELECT * FROM posts
-                WHERE user_id= $user_id";
-        $posts =  $this->db->query($query)
+                WHERE user_id= $user->id";
+        $posts = $this->db->query($query)
             ->fetchAll(PDO::FETCH_ASSOC);
         $new_posts = array();
-        foreach($posts as $post){
+        foreach ($posts as $post) {
             $arr = array(
                 "name" => $user->name,
                 "avatar" => $user->avatar,
@@ -70,28 +67,25 @@ class DB
             $post = array_merge($post, $arr);
             array_push($new_posts, $post);
         }
-
         return $new_posts;
     }
 
-    public function isUserLiked($requestor_id, $post_id){
+    public function isUserLiked($requestor_id, $post_id)
+    {
         $query = "SELECT * FROM `likes`
                 WHERE user_id= $requestor_id 
                 AND post_id= $post_id";
-        if($this->db->query($query)->fetchObject())
+        if ($this->db->query($query)->fetchObject())
             return true;
         return false;
     }
 
-    public function isUserFollowed($user_login, $follower_login){
-        $user = $this->getUser($user_login);
-        $user_id = $user->id;
-        $follower = $this->getUser($follower_login);
-        $follower_id = $follower->id;
+    public function isUserFollowed($user_id, $follower_id)
+    {
         $query = "SELECT * FROM `follows`
                 WHERE user_id= $user_id 
                 AND follower_id= $follower_id";
-        if($this->db->query($query)->fetchObject())
+        if ($this->db->query($query)->fetchObject())
             return true;
         return false;
     }
@@ -126,23 +120,21 @@ class DB
             ->fetchAll(PDO::FETCH_ASSOC);
         $arr = array();
         foreach ($follows_ids as $follow_id) {
-            $user_login = $this->getLoginById($follow_id['user_id']);
-            $user_posts=$this->getPosts($user_login->login, $login);
+            $user_obj = $this->getUserById($follow_id['user_id']);
+            $user_posts = $this->getPosts($user_obj, $user_id);
             array_push($arr, $user_posts);
         }
         $posts = array();
-        foreach($arr as $user_posts){
-            foreach($user_posts as $user_post){
+        foreach ($arr as $user_posts) {
+            foreach ($user_posts as $user_post) {
                 array_push($posts, $user_post);
             }
         }
         return $posts;
     }
 
-    public function dislike($post_id, $login)
+    public function dislike($user_id,$post_id)
     {
-        $user = $this->getUser($login);
-        $user_id = $user->id;
         $query = "UPDATE `posts` SET likes = likes - 1
                 WHERE id= $post_id;
                 DELETE FROM `likes`
@@ -153,10 +145,8 @@ class DB
         return false;
     }
 
-    public function like($post_id, $login)
+    public function like($user_id,$post_id)
     {
-        $user = $this->getUser($login);
-        $user_id = $user->id;
         $query = "UPDATE `posts` SET likes = likes + 1
                 WHERE id= $post_id;
                 INSERT INTO `likes` (post_id, user_id)
@@ -173,20 +163,51 @@ class DB
             ->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function follow($user_id, $follower_id){
+    public function follow($user_id, $follower_id)
+    {
         $query = "INSERT INTO `follows`
                 (user_id, follower_id)
                 VALUES ($user_id, $follower_id)";
-        if($this->db->query($query)) 
+        if ($this->db->query($query))
             return true;
         return false;
     }
-    
-    public function unfollow($user_id, $follower_id){
+
+    public function unfollow($user_id, $follower_id)
+    {
         $query = "DELETE FROM `follows`
                 WHERE user_id= $user_id
                 AND follower_id= $follower_id";
-        if($this->db->query($query)) 
+        if ($this->db->query($query))
+            return true;
+        return false;
+    }
+
+    public function updateDescription($user_id, $description)
+    {
+        $query = "UPDATE `users`
+                SET description= '$description'
+                WHERE id= $user_id";
+        if ($this->db->query($query))
+            return true;
+        return false;
+    }
+
+    public function updateAvatar($user_id, $avatar)
+    {
+        $query = "UPDATE `users`
+                SET avatar= '$avatar'
+                WHERE id= $user_id";
+        $this->db->query($query);
+        return $avatar;
+    }
+
+    public function updateName($user_id, $name)
+    {
+        $query = "UPDATE `users`
+                SET name= '$name'
+                WHERE id= $user_id";
+        if ($this->db->query($query))
             return true;
         return false;
     }

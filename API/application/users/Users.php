@@ -29,6 +29,13 @@ class Users
         }
     }
 
+    public function isUserFollowed($user_login, $follower_login){
+        $user = $this->db->getUser($user_login);
+        $follower = $this->db->getUser($follower_login);
+        if($user && $follower)
+            return $this->db->isUserFollowed($user->id, $follower->id);
+    }
+
     public function follow($user_login, $follower_login){
         $user = $this->db->getUser($user_login);
         $follower = $this->db->getUser($follower_login);
