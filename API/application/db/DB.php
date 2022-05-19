@@ -31,9 +31,9 @@ class DB
                 (login, hash, name) 
                 VALUES ('$login', '$hash', '$name')";
         $result = $this->db->query($query);
-        if ($result)
-            return true;
-        return false;
+        if($result->rowCount() == 0)
+            return false;
+        return true;
     }
 
     public function getUser($login)
@@ -46,7 +46,8 @@ class DB
 
     public function getUserById($id)
     {
-        $query = "SELECT * FROM `users` WHERE id= $id";
+        $query = "SELECT * FROM `users`
+                 WHERE id= $id";
         return $this->db->query($query)
             ->fetchObject();
     }
@@ -60,9 +61,10 @@ class DB
         $new_posts = array();
         foreach ($posts as $post) {
             $arr = array(
-                "name" => $user->name,
-                "avatar" => $user->avatar,
-                "isUserLiked" => $this->isUserLiked($requestor_id, $post['id'])
+                'login' => $user->login,
+                'name' => $user->name,
+                'avatar' => $user->avatar,
+                'isUserLiked' => $this->isUserLiked($requestor_id, $post['id'])
             );
             $post = array_merge($post, $arr);
             array_push($new_posts, $post);
@@ -140,21 +142,33 @@ class DB
                 DELETE FROM `likes`
                 WHERE post_id= $post_id
                 AND user_id= $user_id";
-        if ($this->db->query($query))
-            return true;
-        return false;
+        $result = $this->db->query($query);
+        if($result->rowCount() == 0)
+            return false;
+        return true;
     }
 
-    public function like($user_id,$post_id)
+    public function like($user_id, $post_id)
     {
         $query = "UPDATE `posts` SET likes = likes + 1
                 WHERE id= $post_id;
                 INSERT INTO `likes` (post_id, user_id)
                 VALUES ($post_id, $user_id)";
-        if ($this->db->query($query))
-            return true;
-        return false;
+        $result = $this->db->query($query);
+        if($result->rowCount() == 0){
+            return false;
+        }
+        return true;
     }
+
+    public function getPost($post_id)
+    {
+        $query = "SELECT * FROM `posts`
+                WHERE id= $post_id";
+        return $this->db->query($query)
+            ->fetchObject();
+    }
+
 
     public function getUsers()
     {
@@ -168,9 +182,10 @@ class DB
         $query = "INSERT INTO `follows`
                 (user_id, follower_id)
                 VALUES ($user_id, $follower_id)";
-        if ($this->db->query($query))
-            return true;
-        return false;
+        $result = $this->db->query($query);
+        if($result->rowCount() == 0)
+            return false;
+        return true;
     }
 
     public function unfollow($user_id, $follower_id)
@@ -178,9 +193,10 @@ class DB
         $query = "DELETE FROM `follows`
                 WHERE user_id= $user_id
                 AND follower_id= $follower_id";
-        if ($this->db->query($query))
-            return true;
-        return false;
+        $result = $this->db->query($query);
+        if($result->rowCount() == 0)
+            return false;
+        return true;
     }
 
     public function updateDescription($user_id, $description)
@@ -188,9 +204,10 @@ class DB
         $query = "UPDATE `users`
                 SET description= '$description'
                 WHERE id= $user_id";
-        if ($this->db->query($query))
-            return true;
-        return false;
+        $result = $this->db->query($query);
+        if($result->rowCount() == 0)
+            return false;
+        return true;
     }
 
     public function updateAvatar($user_id, $avatar)
@@ -207,8 +224,19 @@ class DB
         $query = "UPDATE `users`
                 SET name= '$name'
                 WHERE id= $user_id";
-        if ($this->db->query($query))
-            return true;
-        return false;
+        $result = $this->db->query($query);
+        if($result->rowCount() == 0)
+            return false;
+        return true;
+    }
+
+
+    public function deletePost($post_id){
+        $query = "DELETE FROM `posts`
+                WHERE id= $post_id";
+        $result = $this->db->query($query);
+        if($result->rowCount() == 0)
+            return false;
+        return true;
     }
 }

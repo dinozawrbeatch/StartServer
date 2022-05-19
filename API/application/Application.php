@@ -13,8 +13,8 @@ class Application
         $this->users = new Users($db);
         $this->posts = new Posts($db);
         $this->profile = new Profile($db, $this->posts);
-    }    
-    
+    }
+
     /*User methods */
     public function login($params)
     {
@@ -78,7 +78,8 @@ class Application
     {
         $login = $params['login'];
         $post_id = $params['id'];
-        return $this->posts->like($login, $post_id);
+        if ($login && $post_id)
+            return $this->posts->like($login, $post_id);
     }
 
     public function dislike($params)
@@ -86,6 +87,14 @@ class Application
         $login = $params['login'];
         $post_id = $params['id'];
         return $this->posts->dislike($login, $post_id);
+    }
+
+    public function deletePost($params)
+    {
+        $login = $params['login'];
+        $post_id = $params['id'];
+        if ($login && $post_id)
+            return $this->posts->deletePost($login, $post_id);
     }
 
     /*Profile methods */

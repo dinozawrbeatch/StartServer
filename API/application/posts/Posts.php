@@ -15,14 +15,32 @@ class Posts
 
     public function like($login, $post_id){
         $user = $this->db->getUser($login);
-        if($user && $post_id)
-            return $this->db->like($user->id, $post_id);
+        $post = $this->db->getPost($post_id);
+        if($user && $post)
+            return $this->db->like($user->id, $post->id);
     }
 
     public function dislike($login, $post_id){
         $user = $this->db->getUser($login);
         if($user && $post_id)
             return $this->db->dislike($user->id, $post_id);
+    }
+
+    public function deletePost($login, $post_id){
+        $post = $this->db->getPost($post_id);
+        $user = $this->db->getUser($login);
+        $postAudio = strstr($post->audio,'audio/');
+        $postImage = strstr($post->image, 'images/');
+        $postVideo = strstr($post->video, 'videos/');
+        if($post->user_id !== $user->id){
+            return;
+        }
+        if($post){
+            if($postAudio) unlink("../$postAudio");
+            if($postImage) unlink("../$postImage");
+            if($postVideo) unlink("../$postVideo");
+            return $this->db->deletePost($post->id); 
+        }
     }
 
     public function uploadPost($login, $audioName, $videoName, $imageName, $text)
