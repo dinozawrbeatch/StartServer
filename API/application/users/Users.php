@@ -22,7 +22,7 @@ class Users
     public function login($login, $hash, $rand)
     {
         $user = $this->db->getUser($login);
-        if ($user && md5($user->login . $rand) == $hash) {
+        if ($user && md5(md5($user->hash . $rand)) == $hash) {
             return array(
                 'name' => $user->name,
                 'avatar' => $user->avatar,
