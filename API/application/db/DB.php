@@ -52,18 +52,44 @@ class DB
             ->fetchObject();
     }
 
+    private function getComments($post_id){
+        $query = "SELECT comments.id,
+                comments.comment,
+                users.login,
+                users.avatar
+                FROM comments 
+                INNER JOIN users 
+                ON comments.user_id = users.id
+                WHERE post_id= $post_id";
+        return $this->db->query($query)
+            ->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function addComment($user_id, $post_id, $text)
+    {
+        $query = "INSERT INTO `comments`
+                (user_id, post_id, comment)
+                VALUES ($user_id, $post_id, '$text')";
+        $result = $this->db->query($query);
+        if($result->rowCount() == 0)
+            return false;
+        return true;
+    }
+
     public function getPosts($user, $requestor_id)
     {
-        $query = "SELECT * FROM posts
+        $query = "SELECT * FROM `posts`
                 WHERE user_id= $user->id";
         $posts = $this->db->query($query)
             ->fetchAll(PDO::FETCH_ASSOC);
         $new_posts = array();
         foreach ($posts as $post) {
+            $comments = $this->getComments($post['id']);
             $arr = array(
                 'login' => $user->login,
                 'name' => $user->name,
                 'avatar' => $user->avatar,
+                'comments' => $comments,
                 'isUserLiked' => $this->isUserLiked($requestor_id, $post['id'])
             );
             $post = array_merge($post, $arr);
@@ -239,4 +265,5 @@ class DB
             return false;
         return true;
     }
+
 }

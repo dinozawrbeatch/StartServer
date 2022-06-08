@@ -25,6 +25,7 @@ function router($params){
             case 'updateAvatar': return $app->updateAvatar($params);
             case 'updateName': return $app->updateName($params);
             case 'deletePost': return $app->deletePost($params);
+            case 'addComment': return $app->addComment($params);
         }
         return false;
     }

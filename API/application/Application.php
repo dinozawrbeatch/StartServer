@@ -97,6 +97,16 @@ class Application
             return $this->posts->deletePost($login, $post_id);
     }
 
+    public function addComment($params)
+    {
+        $login = $params['login'];
+        $post_id = $params['id'];
+        $text = $params['text'];
+        if ($login && $post_id)
+            return $this->posts->addComment($login, $post_id, $text);
+    }
+
+
     /*Profile methods */
 
     public function getProfile($params)
